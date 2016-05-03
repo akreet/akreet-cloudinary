@@ -1,0 +1,20 @@
+{
+  "name": "akreet-cloudinary",
+  "homepage": "https://github.com/akreet/akreet-cloudinary",
+  "authors": [
+    "admin@akreet.net"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "jquery/jquery#^2.2.3"
+  }
+}
