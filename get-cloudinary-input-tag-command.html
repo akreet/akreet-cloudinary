@@ -1,0 +1,15 @@
+<script>
+    Polymer({
+        is: 'get-cloudinary-input-tag-command',
+        behaviors: [akreet.BaseCommandBehavior],
+
+        execute: function(callback) {
+            this.createRequest({
+                method: 'GET',
+                url: "//akreet.pgbinc.net/cloudinary/inputTag"
+            }).then(function(response) {
+                callback(response.inputTag);
+            });
+        }
+    });
+</script>

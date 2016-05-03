@@ -1,0 +1,191 @@
+<link rel="import" href="cloudinary-base.html">
+<link rel="import" href="get-cloudinary-input-tag-command.html">
+<dom-module id="cloudinary-upload-widget">
+    <style>
+        :host {
+            border: 1px dashed white;
+            border-radius: 4px;
+            width: 300px;
+            height: 250px;
+            position: relative;
+            background: rgba(0,0,0,.2);
+            display: block;
+        }
+
+        .tapped {
+            background: red;
+            transition: color 1s;
+        }
+
+        paper-icon-button {
+            color: white;
+        }
+
+        /* Portrait and Landscape */
+        @media only screen
+            and (min-device-width: 320px)
+            and (max-device-width: 480px)
+            and (-webkit-min-device-pixel-ratio: 2) {
+            paper-icon-button {
+                pointer-events: none;
+            }
+        }
+
+        paper-progress {
+            --paper-progress-container-color: transparent;
+            --paper-progress-active-color: white;
+        }
+
+        .percent {
+            color: rgba(255,255,255, .5);
+            font-size: smaller;
+        }
+    </style>
+    <template>
+        <label class="myFile layout vertical center-center fit" id="myFilePanel">
+            <div class="layout vertical center">
+                <paper-icon-button icon="cloud-upload"></paper-icon-button>
+                <span>{{label}}</span>
+            </div>
+        </label>
+        <div id="paperProgressPanel" class="layout vertical center-center fit" hidden>
+            <div class="percent"><span>[[progressValue]]</span>%</div>
+            <paper-progress id="progressBar"></paper-progress>
+        </div>
+        <get-cloudinary-input-tag-command id="getCloudinaryInputTagCommand"></get-cloudinary-input-tag-command>
+    </template>
+</dom-module>
+<script>
+    (function() {
+        Polymer({
+            is: 'cloudinary-upload-widget',
+            behaviors: [
+                    
+            ],
+
+            hostAttributes: {
+                id: 'direct_upload'
+            },
+
+            properties: {
+                uploadedFile: {
+                    type: Object,
+                    value: null,
+                    notify: true
+                },
+
+                label: {
+                    type: String,
+                    value: 'UPLOAD',
+                    notify: true
+                },
+
+                eager: {
+                    type: String,
+                    value: null
+                },
+
+                progressValue: {
+                    type: Number,
+                    value: null
+                },
+                _cloudinaryFileUpload: {
+                    type: Object,
+                    value: null
+                },
+                count: Number
+            },
+
+            attached: function() {
+                this.async(function() {
+                    this.$.getCloudinaryInputTagCommand.execute(function(inputTag) {
+                        console.log('[attached] setting inputTag: ' + inputTag);
+
+                        // construct the tag
+                        var inputTagElement = document.createElement('input');
+
+                        // inject it into the dom
+                        Polymer.dom(this.$.myFilePanel).appendChild(inputTagElement);
+
+                        // replace its gutz with the inputTag
+                        inputTagElement.outerHTML = inputTag;
+
+                        // init the cloudinary
+                        this.async(function() {
+                            this.initCloudinary();
+                        }.bind(this));
+
+                    }.bind(this));
+                }.bind(this));
+            },
+
+            detached: function() {
+                if(this._cloudinaryFileUpload) {
+                    this._cloudinaryFileUpload.off('fileuploaddone');
+                }
+            },
+
+            reset: function() {
+                this.uploadedFile = null;
+            },
+
+            /**
+             * Additional cloudinary parameters
+             *
+             * disableImageResize: false,
+             * imageMaxWidth: 800,
+             * imageMaxHeight: 600,
+             * acceptFileTypes: /(\.|\/)(gif|jpe?g|png|bmp|ico)$/i,
+             * maxFileSize: 20000000, // 20MB
+             */
+            initCloudinary: function() {
+                console.log('[initCloudinary] count: ' + this.count++);
+                this._cloudinaryFileUpload = $(".cloudinary-fileupload");
+                this._cloudinaryFileUpload
+                        // initialize and bind to events
+                        .cloudinary_fileupload({
+                            dropZone: "#direct_upload",
+                            start: this.onStart.bind(this),
+                            progress: this.onProgress.bind(this),
+                            fail:this.onFail.bind(this),
+                        }).on("fileuploaddone", this.onDone.bind(this));
+            },
+
+            onStart: function(e, data) {
+                this.$.progressBar.value = 0;
+                this.$.paperProgressPanel.hidden = false;
+                this.$.myFilePanel.hidden = true;
+                console.log("Starting upload...");
+            },
+
+            onProgress: function(e, data) {
+                var notRounded = (data.loaded * 100.0) / data.total;
+                var value = Math.round((data.loaded * 100.0) / data.total);
+                this.progressValue = value;
+                this.$.progressBar.value = this.progressValue;
+                console.log("Uploading... " + this.progressValue + "%");
+            },
+
+            onDone: function(e, data) {
+                this.$.paperProgressPanel.hidden = true;
+                this.$.myFilePanel.hidden = false;
+                this.uploadedFile = data.result;
+                console.log('Done: ' + JSON.stringify(this.uploadedFile));
+                this.fire('uploaded', {uploadedFile: this.uploadedFile});
+            },
+
+            onFail: function(e, data) {
+                this.logger.error("Upload failed: " + JSON.stringify(data));
+            },
+
+            setImageBase64: function(data) {
+                console.log('[setImageBase64] setting data: ' + data.length);
+                this._cloudinaryFileUpload.cloudinary_upload_url(data);
+            }
+
+
+        });
+    })();
+</script>
+
+
