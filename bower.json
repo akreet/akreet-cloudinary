@@ -17,6 +17,7 @@
   "dependencies": {
     "jquery": "jquery/jquery#^2.2.3",
     "paper-icon-button": "PolymerElements/paper-icon-button#^1.0.7",
-    "paper-progress": "PolymerElements/paper-progress#^1.0.9"
+    "paper-progress": "PolymerElements/paper-progress#^1.0.9",
+    "akreet-base-command-behavior": "akreet/akreet-base-command-behavior"
   }
 }
