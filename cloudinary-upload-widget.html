@@ -93,12 +93,18 @@
                     type: Object,
                     value: null
                 },
-                count: Number
+                count: Number,
+                _cloudinaryInputTagId: {
+                    type: String,
+                    value: function() {
+                        return Math.random().toString(36).substring(7);
+                    }
+                }
             },
 
             attached: function() {
                 this.async(function() {
-                    this.$.getCloudinaryInputTagCommand.execute(function(inputTag) {
+                    this.$.getCloudinaryInputTagCommand.execute(this._cloudinaryInputTagId, function(inputTag) {
                         console.log('[attached] setting inputTag: ' + inputTag);
 
                         // construct the tag
@@ -140,7 +146,7 @@
              */
             initCloudinary: function() {
                 console.log('[initCloudinary] count: ' + this.count++);
-                this._cloudinaryFileUpload = $(".cloudinary-fileupload");
+                this._cloudinaryFileUpload = this.$$("#cloudinaryInput_" + this._cloudinaryInputTagId);
                 this._cloudinaryFileUpload
                         // initialize and bind to events
                         .cloudinary_fileupload({
