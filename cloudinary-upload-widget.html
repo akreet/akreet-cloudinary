@@ -175,7 +175,7 @@
             },
 
             onFail: function(e, data) {
-                this.logger.error("Upload failed: " + JSON.stringify(data));
+                this.logger.error("Upload failed: " + JSON.stringify(data.messages));
             },
 
             setImageBase64: function(data) {
